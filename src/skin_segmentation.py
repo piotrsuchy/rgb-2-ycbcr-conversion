@@ -1,7 +1,8 @@
 import cv2
 import numpy as np
 from PIL import Image
-
+from pathlib import Path
+import os
 
 def rgb_to_ycrcb(image):
     rows, cols, channels = image.shape
@@ -51,36 +52,43 @@ def draw_mass_center_lines(image, skin_mask):
     return colored_image
 
 
-input_image_path = "cropped.jpg"
+def main():
+    cwd = Path(os.getcwd())
+    media_dir = cwd.parent / 'segmentation' / 'media'
+    input_image_path = "{}/cropped.jpg".format(media_dir)
 
-# Read the input image
-image = cv2.imread(input_image_path)
+    # Read the input image
+    image = cv2.imread(input_image_path)
 
-# Resize the image to 64x64
-# image = cv2.resize(image, (64, 64))
+    # Resize the image to 64x64
+    # image = cv2.resize(image, (64, 64))
 
-# Convert the image to YCrCb format
-ycrcb_image = rgb_to_ycrcb(image)
+    # Convert the image to YCrCb format
+    ycrcb_image = rgb_to_ycrcb(image)
 
-# Save the converted image
-cv2.imwrite("ycrcb_image.jpg", ycrcb_image)
+    # Save the converted image
+    cv2.imwrite("{}/ycrcb_image.jpg".format(media_dir), ycrcb_image)
 
-segmented_skin = skin_segmentation(ycrcb_image)
+    segmented_skin = skin_segmentation(ycrcb_image)
 
-cv2.imwrite("segmented_skin.jpg", segmented_skin)
+    cv2.imwrite("{}/segmented_skin.jpg".format(media_dir), segmented_skin)
 
-filtered_skin = median_filter(segmented_skin)
+    filtered_skin = median_filter(segmented_skin)
 
-cv2.imwrite("filtered_skin.jpg", filtered_skin)
+    cv2.imwrite("{}/filtered_skin.jpg".format(media_dir), filtered_skin)
 
-output_image = filtered_skin
+    output_image = filtered_skin
 
-output_image = draw_mass_center_lines(output_image, filtered_skin)
+    output_image = draw_mass_center_lines(output_image, filtered_skin)
 
-cv2.imwrite("center_lines.jpg", output_image)
+    cv2.imwrite("{}/center_lines.jpg".format(media_dir), output_image)
 
-# Open the JPG image
-input_image = Image.open("center_lines.jpg")
+    # Open the JPG image
+    input_image = Image.open("{}/center_lines.jpg".format(media_dir))
 
-# Save the image in PPM format
-input_image.save("center_lines.ppm", "PPM")
+    # Save the image in PPM format
+    input_image.save("{}/center_lines.ppm".format(media_dir), "PPM")
+    
+
+if __name__ == "__main__":
+    main()
